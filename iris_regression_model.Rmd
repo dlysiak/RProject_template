@@ -1,0 +1,61 @@
+---
+title: "Rproject_template_rmarkdown"
+author: "DKL"
+date: "2023-07-01"
+output:
+  html_document:
+    fig_caption: yes
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+#If you don't want to show the code
+#knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+ 
+```
+
+```{r}
+library(tidyverse)
+#conflict_prefer("filter", "dplyr")
+library(broom)
+library(knitr)
+```
+
+## Report
+In this report we evaluate the relationship between petal length and sepal width for irises.
+
+```{r iris}
+data(iris)
+iris_nonsetosa <- iris %>%
+  filter(Species != "setosa")
+```
+
+The original data set has `r iris$Species %>% unique() %>% length()` species, 
+but we will only work with `r iris_nonsetosa$Species %>% unique() %>% length()`
+of them. 
+
+### Model
+
+The model results are below.
+
+```{r caption = "Table 1"}
+m_pl_sw <- lm(Petal.Length ~ Sepal.Width, data = iris_nonsetosa)
+tidy_m_pl_sw <- tidy(m_pl_sw)
+kable(tidy_m_pl_sw,
+      caption="Table 1. Regression output for predictiong petal length for sepal width.",
+      digits = 2)
+```
+
+The slope of the regression model is `r tidy_m_pl_sw %>% filter(term == "Sepal.Width") %>% pull(estimate) %>% round(2)`.
+
+## Visualize
+
+The figure below shows the relationship between these variables, and we observe a positive slope in this visualization as well. 
+
+```{r fig.cap = "Figure 2. Relationship between petal length and sepal width"}
+ggplot(iris_nonsetosa) +
+  geom_point(aes(x = Sepal.Width, y = Petal.Length, color = Species)) +
+  geom_smooth(aes(x= Sepal.Width, y= Petal.Length), method = "lm")
+```
+# Set echo = FALSE if your audience do not have to see the code. 
